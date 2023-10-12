@@ -1,4 +1,3 @@
-// Charger les variables d'environnement à partir du fichier .env
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
