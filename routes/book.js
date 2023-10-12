@@ -14,8 +14,15 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:id', getBook, (req, res) => {
-    res.json(res.book);
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const book = await Book.findById(id);
+        if (!book) return res.status(404).json({ message: 'Book not found' });
+        res.json(book);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 router.post('/', jwt.checkToken, async (req, res) => {
@@ -35,28 +42,32 @@ router.post('/', jwt.checkToken, async (req, res) => {
     }
 });
 
-router.delete('/:id', jwt.checkToken, getBook, async (req, res) => {
+router.delete('/:id', jwt.checkToken, async (req, res) => {
+    const { id } = req.params;
     try {
-        await res.book.remove();
+        await Book.findByIdAndRemove(id);
         res.json({ message: 'Deleted Book' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-async function getBook(req, res, next) {
-    let book;
+router.put('/:id', jwt.checkToken, async (req, res) => {
+    const { id } = req.params;
+    const updatedBook = {
+        title: req.body.title,
+        author: req.body.author,
+        pages: req.body.pages,
+        genre: req.body.genre,
+        published: req.body.published,
+        userId: req.body.userId
+    };
     try {
-        book = await Book.findById(req.params.id);
-        if (book == null) {
-            return res.status(404).json({ message: 'Cannot find book' });
-        }
+        const book = await Book.findByIdAndUpdate(id, updatedBook, { new: true });
+        res.json(book);
     } catch (err) {
-        return res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
-
-    res.book = book;
-    next();
-}
+});
 
 module.exports = router;
