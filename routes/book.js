@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:id', jwt.checkToken, getBook, (req, res) => {
+router.get('/:id', getBook, (req, res) => {
     res.json(res.book);
 });
 
